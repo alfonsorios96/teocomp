@@ -1,8 +1,7 @@
 /*
 	@author: Alfonso Ríos
-	@created: February 2nd, 2016
 	@description: This is the template about all the functions.
-	@version: v0.0.2
+	@version: v0.0.3
 */
 
 #include <stdio.h>
@@ -39,3 +38,4 @@ void str_current(char s1[], char s2[]);
 void str_fixes(char s1[], char s2[], int size, int fix);
 void str_subString(char s1[], char s2[], int prefix, int subfix);
 void str_subSecuence(char s1[], char s2[], char s3[]);
+int str_existIn(char character, char string[]);

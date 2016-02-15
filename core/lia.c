@@ -1,8 +1,7 @@
 /*
 	@author: Alfonso Ríos
-	@created: February 2nd, 2016
 	@description: This is the core about all the functions.
-	@version: v0.0.2
+	@version: v0.0.3
 */
 
 #include "lia.h"
@@ -66,6 +65,7 @@ int str_size(char string[]){
 
 // Here is defined the method to get a array char of user.
 void str_input(char string[]){
+	fflush(stdin);
 	fgets (string, SIZE_MAX, stdin);
 	string[str_size(string) - 1] = '\0';
 }
@@ -149,4 +149,17 @@ void str_subSecuence(char s1[], char s2[], char s3[]){
 		}
 	}
 	s3[k + 1] = '\0';
+}
+
+// Here is define the function to match a char.
+int str_existIn(char character, char string[]){
+	int i = 0;
+	for (i = 0; i < str_size(string); i++)
+	{
+		if (string[i] == character)
+		{
+			return 1;
+		}
+	}
+	return 0;
 }
