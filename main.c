@@ -1,15 +1,17 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the method main.
-	@version: v0.0.3
+	@version: v0.0.4
 */
 
 #include "core/lia.c"
-#include "core/practice1.c"
 
 int main(int argc, char const *argv[])
 {
-	run();
+	NODE *head = (NODE *) malloc(sizeof(NODE));
+	l_construct(head);
+	head = l_addFirst(head, "1");
+
 	return 0;
 }
 

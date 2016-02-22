@@ -1,7 +1,7 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the template about all the functions.
-	@version: v0.0.3
+	@version: v0.0.4
 */
 
 #include <stdio.h>
@@ -18,6 +18,12 @@ typedef struct pile
 	type data;
 	struct pile *next;
 }PILE;
+
+typedef struct list
+{
+	type string[SIZE_MAX];
+	struct list *prev, *next;
+}NODE;
 
 // Here are declared the functions.
 
@@ -39,3 +45,13 @@ void str_fixes(char s1[], char s2[], int size, int fix);
 void str_subString(char s1[], char s2[], int prefix, int subfix);
 void str_subSecuence(char s1[], char s2[], char s3[]);
 int str_existIn(char character, char string[]);
+void str_pow(char s1[], char s2[], int n);
+void str_cpy(char s1[], char s2[]);
+
+// List
+
+void l_construct(NODE *root);
+int l_size(NODE *head);
+NODE * l_addFirst(NODE *head, char string[]);
+NODE * l_addLast(NODE *head, char string[]);
+void l_showAll(NODE *head);

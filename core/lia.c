@@ -1,7 +1,7 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the core about all the functions.
-	@version: v0.0.3
+	@version: v0.0.4
 */
 
 #include "lia.h"
@@ -162,4 +162,110 @@ int str_existIn(char character, char string[]){
 		}
 	}
 	return 0;
+}
+
+// Here is define the function to loop concat.
+void str_pow(char s1[], char s2[], int n){
+	int i = 0, j = 0, k = 0;
+
+	for (i = 0; i < n; i++)
+	{
+		for (j = 0; j < str_size(s1); j++)
+		{
+			s2[k] = s1[j];
+			k++;
+		}
+	}
+
+	s2[k] = '\0';
+}
+
+// Here is defined the function to copy a string.
+void str_cpy(char s1[], char s2[]){
+	int i = 0;
+	for (i = 0; i < str_size(s1); i++)
+	{
+		s2[i] = s1[i];
+	}
+	s2[i] = '\0';
+}
+
+/*
+	-----------    LIST ----------------
+	This is a kind of struct. You can move
+	bidirectional.
+*/
+
+void l_construct(NODE *root){
+	root->string[0] = '\0';	
+	root->prev = NULL;
+	root->next = NULL;
+}
+
+int l_size(NODE *head){
+	NODE *temp;
+	int size = 0;
+
+	if (head->next != NULL)
+	{
+		for (temp = head; temp != NULL; temp = temp->next)
+			size++;
+	}else{
+		for (temp = head; temp != NULL; temp = temp->prev)
+			size++;
+	}
+	return size;
+}
+
+NODE * l_addFirst(NODE *head, char string[]){
+	if (str_size(head->string) == 0)
+	{
+		str_cpy(string, head->string);
+		return head;
+	}else{
+		NODE *temp;
+		for (temp = head; temp->prev != NULL; temp = temp->prev)
+		{
+			/* code */
+		}
+		NODE *new = (NODE *) malloc(sizeof(NODE));
+		l_construct(new);
+		str_cpy(string, new->string);
+		new->next = temp;
+		temp->prev = new;
+		return new;
+	}
+}
+
+NODE * l_addLast(NODE *head, char string[]){
+	if (str_size(head->string) == 0)
+	{
+		str_cpy(string, head->string);
+		return head;
+	}else{
+		NODE *temp;
+		for (temp = head; temp->next != NULL; temp = temp->next)
+		{
+			/* code */
+		}
+		NODE *new = (NODE *) malloc(sizeof(NODE));
+		l_construct(new);
+		str_cpy(string, new->string);
+		new->prev = temp;
+		temp->next = new;
+		return new;
+	}
+}
+
+void l_showAll(NODE *head){
+	NODE *temp;
+
+	if (head->next != NULL)
+	{
+		for (temp = head; temp != NULL; temp = temp->next)
+			printf("%s\n", temp->string);
+	}else{
+		for (temp = head; temp != NULL; temp = temp->prev)
+			printf("%s\n", temp->string);
+	}
 }
