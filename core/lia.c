@@ -190,6 +190,23 @@ void str_cpy(char s1[], char s2[]){
 	s2[i] = '\0';
 }
 
+int str_cmpr(char s1[], char s2[]){
+	int i;
+	if (str_size(s1) == str_size(s2))
+	{
+		for (i = 0; i < str_size(s1); i++)
+		{
+			if (s1[i] != s2[i])
+			{
+				return 0;
+			}
+		}
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
 /*
 	-----------    LIST ----------------
 	This is a kind of struct. You can move
@@ -263,9 +280,10 @@ void l_showAll(NODE *head){
 	if (head->next != NULL)
 	{
 		for (temp = head; temp != NULL; temp = temp->next)
-			printf("%s\n", temp->string);
+			printf("%s, ", temp->string);
 	}else{
 		for (temp = head; temp != NULL; temp = temp->prev)
-			printf("%s\n", temp->string);
+			printf("%s, ", temp->string);
 	}
+	printf("\n");
 }

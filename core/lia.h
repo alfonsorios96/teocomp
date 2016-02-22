@@ -47,6 +47,7 @@ void str_subSecuence(char s1[], char s2[], char s3[]);
 int str_existIn(char character, char string[]);
 void str_pow(char s1[], char s2[], int n);
 void str_cpy(char s1[], char s2[]);
+int str_cmpr(char s1[], char s2[]);
 
 // List
 
