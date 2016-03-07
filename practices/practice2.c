@@ -163,3 +163,26 @@ void p2_inverse(NODE * lang1, NODE * lang2){
 	}
 	l_showAll(lang4);
 }
+/*
+void p2_pow(NODE * lang){
+	int n;
+	printf("\nSelecciona una potencia : ");
+	scanf("%i", &n);
+	if (n == 0)
+	{
+		printf("\n\nPotencia del lenguaje : e\n");
+	}
+	if (n > 0)
+	{
+		int i;
+		for (i = 0; i < n; i++)
+		{
+			
+		}
+	}
+	if (n < 0)
+	{
+		
+	}
+}
+*/

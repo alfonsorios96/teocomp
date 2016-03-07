@@ -1,12 +1,12 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the template about all the functions.
-	@version: v0.0.4
+	@version: v0.0.6
 */
 
 #include <stdio.h>
 #include <stdlib.h>
-#define SIZE_MAX 120
+#define SIZE_MAX 1200
 
 // Here is defined the type of data.
 typedef char type;
@@ -21,6 +21,8 @@ typedef struct pile
 
 typedef struct list
 {
+	int status, s_next;
+	char dat;
 	type string[SIZE_MAX];
 	struct list *prev, *next;
 }NODE;
@@ -56,3 +58,7 @@ int l_size(NODE *head);
 NODE * l_addFirst(NODE *head, char string[]);
 NODE * l_addLast(NODE *head, char string[]);
 void l_showAll(NODE *head);
+
+// Automatas
+	// Determinist
+NODE * da_addRule(NODE *root);

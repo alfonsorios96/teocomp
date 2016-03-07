@@ -1,7 +1,7 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the core about all the functions.
-	@version: v0.0.4
+	@version: v0.0.6
 */
 
 #include "lia.h"
@@ -214,6 +214,9 @@ int str_cmpr(char s1[], char s2[]){
 */
 
 void l_construct(NODE *root){
+	root->status = 0;
+	root->s_next = 0;
+	root->dat = '\0';
 	root->string[0] = '\0';	
 	root->prev = NULL;
 	root->next = NULL;
@@ -286,4 +289,27 @@ void l_showAll(NODE *head){
 			printf("%s, ", temp->string);
 	}
 	printf("\n");
+}
+
+/*
+	-----------    AUTOMATA ----------------
+	
+*/
+
+NODE * da_addRule(NODE *root){
+	type string[SIZE_MAX];
+	int status, s_next;
+
+	printf("\nEstatus actual : ");
+	scanf("%i", &status);
+	printf("\nCaracter a recibir : ");
+	str_input(string);
+	printf("\nEstatus siguiente : ");
+	scanf("%i", &s_next);
+
+	root = l_addFirst(root, string);
+	root->status = status;
+	root->s_next = s_next;
+	root->dat = string[0];
+	return root;
 }
