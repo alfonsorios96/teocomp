@@ -1,7 +1,7 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the core about all the functions.
-	@version: v0.0.6
+	@version: v0.0.7
 */
 
 #include "lia.h"
@@ -214,9 +214,6 @@ int str_cmpr(char s1[], char s2[]){
 */
 
 void l_construct(NODE *root){
-	root->status = 0;
-	root->s_next = 0;
-	root->dat = '\0';
 	root->string[0] = '\0';	
 	root->prev = NULL;
 	root->next = NULL;
@@ -292,24 +289,126 @@ void l_showAll(NODE *head){
 }
 
 /*
-	-----------    AUTOMATA ----------------
+	-----------    FD AUTOMATA ----------------
 	
 */
 
-NODE * da_addRule(NODE *root){
+void fda_delta_construct(DELTA * delta){
+	delta->state = 0;
+	delta->s_next = 0;
+	delta->data = '\0';
+	delta->prev = NULL;
+	delta->next = NULL;
+}
+
+DELTA * fda_addDelta(DELTA * head, char data, int state, int next){
+	if (data == '\0')
+	{
+		head->data = data;
+		head->state = state;
+		head->s_next = next;
+		return head;
+	}else{
+		DELTA *temp;
+		for (temp = head; temp->prev != NULL; temp = temp->prev)
+		{
+			/* code */
+		}
+		DELTA *new = (DELTA *) malloc(sizeof(DELTA));
+		fda_delta_construct(new);
+		new->data = data;
+		new->state = state;
+		new->s_next = next;
+		new->next = temp;
+		temp->prev = new;
+		return new;
+	}
+}
+
+FD_AUTOMATA * fda_createDeltas(FD_AUTOMATA * automata){
 	type string[SIZE_MAX];
-	int status, s_next;
+	int state, s_next;
 
 	printf("\nEstatus actual : ");
-	scanf("%i", &status);
+	scanf("%i", &state);
 	printf("\nCaracter a recibir : ");
 	str_input(string);
 	printf("\nEstatus siguiente : ");
 	scanf("%i", &s_next);
 
-	root = l_addFirst(root, string);
-	root->status = status;
-	root->s_next = s_next;
-	root->dat = string[0];
-	return root;
+	automata->head = fda_addDelta(automata->head, string[0], state, s_next);
+
+	return automata;
+}
+
+void fda_construct(FD_AUTOMATA * automata){
+	automata->states[0] = 0;
+	automata->size = 0;
+	automata->head = (DELTA *) malloc(sizeof(DELTA));
+	fda_delta_construct(automata->head);
+}
+
+int fda_existState(int states[], int size, int state){
+	int i;
+
+	for (i = 0; i < size; i++)
+		if (states[i] == state)
+			return 1;
+	return 0;
+}
+
+int fda_setStates(FD_AUTOMATA * automata){
+	int i = 0;
+	int opc = 0;
+
+	for (i = 0; i < SIZE_MAX; i++)
+		automata->states[i] = 0;
+	i = 0;
+
+	do{
+		int state;
+
+		printf("\nInserte estado final: ");
+		scanf("%i", &state);
+		if (fda_existState(automata->states, i, state) == 0){
+			automata->states[i] = state;
+			i++;
+		}
+
+		printf("Desea ingresar otro estado ?\n");
+		scanf("%i", &opc);
+	}while(opc == 1);
+
+	return i;
+}
+
+FD_AUTOMATA * fda_create(FD_AUTOMATA * automata){
+	automata->size = fda_setStates(automata);
+	int opc = 0;
+
+	do{
+		automata = fda_createDeltas(automata);
+		printf("Desea ingresar otra funcion ?\n");
+		scanf("%i", &opc);
+	}while(opc == 1);
+
+	return automata;
+}
+
+int fda_execute(FD_AUTOMATA * automata, char data, int state){
+	FD_AUTOMATA *temp = NULL;
+
+	for (temp = automata->head; temp != NULL; temp = temp->next)
+		if (data == temp->data && state == temp->state){
+			return temp->s_next;
+		}
+	return state;
+}
+
+void fda_showDeltas(FD_AUTOMATA * automata){
+	DELTA *temp = NULL;
+	for (temp = automata->head; temp != NULL; temp = temp->next)
+	{
+		printf("Estado %i con caracter %c pasa al estado %i\n", temp->state, temp->data, temp->s_next);
+	}
 }
