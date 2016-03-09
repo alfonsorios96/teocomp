@@ -1,7 +1,7 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the core about all the functions.
-	@version: v0.0.7
+	@version: v0.0.8
 */
 
 #include "lia.h"
@@ -396,7 +396,7 @@ FD_AUTOMATA * fda_create(FD_AUTOMATA * automata){
 }
 
 int fda_execute(FD_AUTOMATA * automata, char data, int state){
-	FD_AUTOMATA *temp = NULL;
+	DELTA *temp = NULL;
 
 	for (temp = automata->head; temp != NULL; temp = temp->next)
 		if (data == temp->data && state == temp->state){
@@ -407,8 +407,105 @@ int fda_execute(FD_AUTOMATA * automata, char data, int state){
 
 void fda_showDeltas(FD_AUTOMATA * automata){
 	DELTA *temp = NULL;
-	for (temp = automata->head; temp != NULL; temp = temp->next)
+	for (temp = automata->head; temp->state != '\0'; temp = temp->next)
 	{
 		printf("Estado %i con caracter %c pasa al estado %i\n", temp->state, temp->data, temp->s_next);
 	}
+}
+
+/*
+	-----------  FILES  ----------------
+	
+*/
+
+// Here is defined the method to construct a row struct
+void f_row_construct(ROW *row){
+	row->row = 0;
+	row->data[0] = '\0';
+	row->prev = NULL;
+	row->next = NULL;
+}
+
+// Here is defined the method to get the numbers of rows of a file
+int f_row_size(ROW *head){
+	ROW *temp;
+	int size = 0;
+
+	if (head->next != NULL)
+	{
+		for (temp = head; temp != NULL; temp = temp->next)
+			size++;
+	}else{
+		for (temp = head; temp != NULL; temp = temp->prev)
+			size++;
+	}
+
+	return size;
+}
+
+// Here is defined the method to add a row struct from file.
+ROW * f_addRow(ROW *head, char string[]){
+	if (str_size(head->data) == 0)
+	{
+		str_cpy(string, head->data);
+		head->row = 1;
+
+		return head;
+	}else{
+		ROW *new = (ROW *) malloc(sizeof(ROW));
+		f_row_construct(new);
+		str_cpy(string, new->data);
+		new->row = head->row + 1;
+		new->prev = head;
+		head->next = new;
+
+		return new;
+	}
+}
+
+// Here is defined the method to invert order of this list
+ROW * f_changeOrder(ROW *head){
+	ROW *temp, *new;
+	new = (ROW *) malloc(sizeof(ROW));
+	f_row_construct(new);
+
+	for (temp = head; temp != NULL; temp = temp->next)
+		new = f_addRow(new, temp->data);
+	return new;
+}
+
+// Here is defined the method to get a file
+ROW * f_input(ROW *head){
+	FILE *file;
+ 
+ 	file = fopen("./files/dummy.txt","r");
+ 	
+ 	if (file == NULL)
+ 		exit(1);
+ 	
+ 	while (feof(file) == 0)
+ 	{
+ 		char string[SIZE_MAX];
+ 		fgets(string,SIZE_MAX,file);
+ 		head = f_addRow(head, string);
+ 	}
+
+    fclose(file);
+    return head;
+}
+
+// Here is defined the method to show all rows of a file
+void f_showRows(ROW *head){
+	ROW *temp;
+
+	if (head->next != NULL)
+	{
+		for (temp = head; temp != NULL; temp = temp->next)
+			printf("%s\n", temp->data);
+	}
+
+	for (temp = head; temp != NULL; temp = temp->prev)
+			printf("%s\n", temp->data);
+
+	printf("\n");
 }

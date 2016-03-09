@@ -41,6 +41,13 @@ typedef struct fd_automata
 	struct delta *head;
 }FD_AUTOMATA;
 
+typedef struct row
+{
+	int row;
+	char data[SIZE_MAX];
+	struct row *prev, *next;
+}ROW;
+
 // Here are declared the functions.
 
 // Pile

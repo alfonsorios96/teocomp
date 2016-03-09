@@ -9,8 +9,6 @@
 void run(void){
 	FD_AUTOMATA *automata = (FD_AUTOMATA *) malloc(sizeof(FD_AUTOMATA));
 	fda_construct(automata);
-	automata = fda_create(automata);
-	fda_showDeltas(automata);
 	menu(automata);
 }
 
@@ -51,7 +49,7 @@ void p3_run(FD_AUTOMATA * automata){
 
 	for (i = 0; i < str_size(array); i++)
 	{
-		printf("\nEstatus '%i' en caracter '%c'", state, array[i]);
+		printf("\nEstado '%i' en caracter '%c'", state, array[i]);
 		state = fda_execute(automata, array[i], state);
 	}
 

@@ -8,3 +8,4 @@ v0.0.4 MODULE : Lists	 		2016/02/18
 v0.0.5 MODULE : Languages	 	2016/02/21
 v0.0.6 MODULE : Automatas	 	2016/03/06
 v0.0.7 MODULE : Finite Det	 	2016/03/08
+v0.0.8 MODULE : Files		 	2016/03/09
