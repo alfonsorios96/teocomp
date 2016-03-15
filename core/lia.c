@@ -1,7 +1,7 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the core about all the functions.
-	@version: v0.0.8
+	@version: v0.0.9
 */
 
 #include "lia.h"
@@ -302,25 +302,20 @@ void fda_delta_construct(DELTA * delta){
 }
 
 DELTA * fda_addDelta(DELTA * head, char data, int state, int next){
-	if (data == '\0')
+	if (head->data == '\0')
 	{
 		head->data = data;
 		head->state = state;
 		head->s_next = next;
 		return head;
 	}else{
-		DELTA *temp;
-		for (temp = head; temp->prev != NULL; temp = temp->prev)
-		{
-			/* code */
-		}
 		DELTA *new = (DELTA *) malloc(sizeof(DELTA));
 		fda_delta_construct(new);
 		new->data = data;
 		new->state = state;
 		new->s_next = next;
-		new->next = temp;
-		temp->prev = new;
+		new->next = head;
+		head->prev = new;
 		return new;
 	}
 }
@@ -407,7 +402,7 @@ int fda_execute(FD_AUTOMATA * automata, char data, int state){
 
 void fda_showDeltas(FD_AUTOMATA * automata){
 	DELTA *temp = NULL;
-	for (temp = automata->head; temp->state != '\0'; temp = temp->next)
+	for (temp = automata->head; temp != NULL; temp = temp->next)
 	{
 		printf("Estado %i con caracter %c pasa al estado %i\n", temp->state, temp->data, temp->s_next);
 	}
@@ -498,14 +493,117 @@ ROW * f_input(ROW *head){
 void f_showRows(ROW *head){
 	ROW *temp;
 
-	if (head->next != NULL)
-	{
-		for (temp = head; temp != NULL; temp = temp->next)
-			printf("%s\n", temp->data);
-	}
-
 	for (temp = head; temp != NULL; temp = temp->prev)
 			printf("%s\n", temp->data);
 
 	printf("\n");
+}
+
+// Here is defined the method read the states from file
+void f_readStates(ROW *head, int states[], int *tam){
+	ROW *temp;
+
+	for (temp = head; temp != NULL; temp = temp->prev){
+		int size = str_size(temp->data);
+		int i, flag = 0;
+		int j = 0;
+
+		for (i = 0; i < SIZE_MAX; i++)
+			states[i] = -1;
+		i = 0;
+
+		for (i = 0; i < size; i++)
+		{
+			switch(temp->data[i]){
+				case '[':
+					flag = 1;
+				break;
+				case ']':
+					flag = 2;
+				break;
+				case ':':
+					flag = 3;
+				break;
+				default:
+					flag = 0;
+				break;
+			}
+
+			if (flag == 1 || flag == 3)
+			{
+				states[j] = (int) temp->data[i + 1] - 48;
+				j++;
+			}
+			*tam = j;
+			if (flag == 2)
+			{
+				break;
+			}
+		}
+	}
+}
+
+// Here is defined the method read the deltas functions from file
+void f_readDeltas(ROW *head, FD_AUTOMATA ** automata){
+	ROW *temp;
+	int flag = 0;
+
+	for (temp = head; temp != NULL; temp = temp->prev)
+	{
+		char data = '\0';
+		int state = -1, s_next = -1;
+		int size = str_size(temp->data);
+		int i;
+
+		for (i = 0; i < size; i++)
+		{
+			switch(temp->data[i]){
+				case '{': 
+					flag = 1;
+					i++;
+				break;
+				case '+': 
+					flag = 2;
+					i++;
+				break;
+				case '=': 
+					flag = 3;
+					i++;
+				break;
+				case '}': 
+					flag = 4;
+					i++;
+				break;
+			}
+
+			if (flag == 1)
+			{
+				state = (int) temp->data[i] - 48;
+			}
+			if (flag == 2)
+			{
+				data = temp->data[i];
+			}
+			if (flag == 3)
+			{
+				s_next = (int) temp->data[i] - 48;
+			}
+			if (flag == 4 && data != '\0')
+			{
+				(*automata)->head = fda_addDelta((*automata)->head, data, state, s_next);
+				//printf("Debbuger %i+%c=%i\n", (*automata)->head->state, (*automata)->head->data, (*automata)->head->s_next);
+				break;
+			}		
+		}
+	}
+}
+
+void f_readAutomata(FD_AUTOMATA ** automata){
+	ROW * file = (ROW *) malloc(sizeof(ROW));
+	f_row_construct(file);
+	file = f_input(file);
+	int count = 0;
+	f_readDeltas(file, automata);
+	f_readStates(file, (*automata)->states, &count);
+	(*automata)->size = count;
 }

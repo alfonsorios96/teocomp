@@ -1,6 +1,6 @@
 /*
 	@author: Alfonso Ríos
-	@description: This is the template about practice 1
+	@description: This is the template about practice 3
 	@version: v0.0.7
 */
 
