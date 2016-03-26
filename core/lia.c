@@ -320,6 +320,20 @@ DELTA * fda_addDelta(DELTA * head, char data, int state, int next){
 	}
 }
 
+void fda_rmDelta(FD_AUTOMATA ** automata, char data, int state, int next){
+	DELTA *temp;
+
+	for (temp = (*automata)->head; temp != NULL; temp = temp->next)
+	{
+		if (temp->data == data && temp->state == state && temp->s_next == next)
+		{
+			DELTA *aux = temp;
+			temp = temp->prev;
+			temp->next = aux->next;
+		}
+	}
+}
+
 FD_AUTOMATA * fda_createDeltas(FD_AUTOMATA * automata){
 	type string[SIZE_MAX];
 	int state, s_next;
@@ -337,8 +351,12 @@ FD_AUTOMATA * fda_createDeltas(FD_AUTOMATA * automata){
 }
 
 void fda_construct(FD_AUTOMATA * automata){
+	automata->language[0] = '\0';
 	automata->states[0] = 0;
 	automata->size = 0;
+	automata->finals[0] = 0;
+	automata->f_size = 0;
+	automata->init = 0;
 	automata->head = (DELTA *) malloc(sizeof(DELTA));
 	fda_delta_construct(automata->head);
 }
@@ -458,22 +476,11 @@ ROW * f_addRow(ROW *head, char string[]){
 	}
 }
 
-// Here is defined the method to invert order of this list
-ROW * f_changeOrder(ROW *head){
-	ROW *temp, *new;
-	new = (ROW *) malloc(sizeof(ROW));
-	f_row_construct(new);
-
-	for (temp = head; temp != NULL; temp = temp->next)
-		new = f_addRow(new, temp->data);
-	return new;
-}
-
 // Here is defined the method to get a file
 ROW * f_input(ROW *head){
 	FILE *file;
  
- 	file = fopen("./files/dummy.txt","r");
+ 	file = fopen("./files/practica5.txt","r");
  	
  	if (file == NULL)
  		exit(1);
@@ -494,7 +501,7 @@ void f_showRows(ROW *head){
 	ROW *temp;
 
 	for (temp = head; temp != NULL; temp = temp->prev)
-			printf("%s\n", temp->data);
+			printf("%i - %s\n", temp->row, temp->data);
 
 	printf("\n");
 }
@@ -502,43 +509,51 @@ void f_showRows(ROW *head){
 // Here is defined the method read the states from file
 void f_readStates(ROW *head, int states[], int *tam){
 	ROW *temp;
+	int j = 0;
 
 	for (temp = head; temp != NULL; temp = temp->prev){
-		int size = str_size(temp->data);
-		int i, flag = 0;
-		int j = 0;
-
-		for (i = 0; i < SIZE_MAX; i++)
-			states[i] = -1;
-		i = 0;
-
-		for (i = 0; i < size; i++)
+		if (temp->row == 1)
 		{
-			switch(temp->data[i]){
-				case '[':
-					flag = 1;
-				break;
-				case ']':
-					flag = 2;
-				break;
-				case ':':
-					flag = 3;
-				break;
-				default:
-					flag = 0;
-				break;
+			int size = str_size(temp->data);
+			int i;
+
+			for (i = 0; i < size; i++){
+				if (temp->data[i] != ',' && (int) temp->data[i] != 10)
+				{
+					states[j] = (int) temp->data[i] - 48;
+					j++;
+				}
 			}
 
-			if (flag == 1 || flag == 3)
-			{
-				states[j] = (int) temp->data[i + 1] - 48;
-				j++;
-			}
 			*tam = j;
-			if (flag == 2)
-			{
-				break;
+		}else{
+			continue;
+		}
+	}
+}
+
+// Here is defined the method read the final states from file
+void f_readFinalStates(ROW *head, int states[], int *tam){
+	ROW *temp;
+	int j = 0;
+
+	for (temp = head; temp != NULL; temp = temp->prev){
+		if (temp->row == 4)
+		{
+			int size = str_size(temp->data);
+			int i;
+
+			for (i = 0; i < size; i++){
+				if (temp->data[i] != ',' && (int) temp->data[i] != 10)
+				{
+					states[j] = (int) temp->data[i] - 48;
+					j++;
+				}
 			}
+
+			*tam = j;
+		}else{
+			continue;
 		}
 	}
 }
@@ -550,50 +565,55 @@ void f_readDeltas(ROW *head, FD_AUTOMATA ** automata){
 
 	for (temp = head; temp != NULL; temp = temp->prev)
 	{
-		char data = '\0';
-		int state = -1, s_next = -1;
-		int size = str_size(temp->data);
-		int i;
-
-		for (i = 0; i < size; i++)
+		if (temp->row > 4)
 		{
-			switch(temp->data[i]){
-				case '{': 
-					flag = 1;
-					i++;
-				break;
-				case '+': 
-					flag = 2;
-					i++;
-				break;
-				case '=': 
-					flag = 3;
-					i++;
-				break;
-				case '}': 
-					flag = 4;
-					i++;
-				break;
-			}
+			char data = '\0';
+			int state = -1, s_next = -1;
+			int size = str_size(temp->data);
+			int i;
 
-			if (flag == 1)
+			for (i = 0; i < size; i++)
 			{
-				state = (int) temp->data[i] - 48;
+				if (temp->data[i] != ',')
+				{
+					flag++;
+
+					if (flag == 1)
+					{
+						state = (int) temp->data[i] - 48;
+					}
+					if (flag == 2)
+					{
+						data = temp->data[i];
+					}
+					if (flag == 3)
+					{
+						s_next = (int) temp->data[i] - 48;
+					}
+					if (flag == 4)
+					{
+						flag = 0;
+						if (data != '\0' && state != -1)
+						{
+							(*automata)->head = fda_addDelta((*automata)->head, data, state, s_next);
+						}
+					}
+				}
 			}
-			if (flag == 2)
-			{
-				data = temp->data[i];
-			}
-			if (flag == 3)
-			{
-				s_next = (int) temp->data[i] - 48;
-			}
-			if (flag == 4 && data != '\0')
-			{
-				(*automata)->head = fda_addDelta((*automata)->head, data, state, s_next);
-				//printf("Debbuger %i+%c=%i\n", (*automata)->head->state, (*automata)->head->data, (*automata)->head->s_next);
-				break;
-			}		
+		}else{
+			continue;
+		}
+	}
+}
+
+void f_readInit(ROW *head, FD_AUTOMATA ** automata){
+	ROW *temp;
+
+	for (temp = head; temp != NULL; temp = temp->prev)
+	{
+		if (temp->row == 3)
+		{
+			(*automata)->init = (int) temp->data[0] - 48;
 		}
 	}
 }
@@ -603,7 +623,10 @@ void f_readAutomata(FD_AUTOMATA ** automata){
 	f_row_construct(file);
 	file = f_input(file);
 	int count = 0;
+	f_readInit(file, automata);
 	f_readDeltas(file, automata);
 	f_readStates(file, (*automata)->states, &count);
 	(*automata)->size = count;
+	f_readFinalStates(file, (*automata)->finals, &count);
+	(*automata)->f_size = count;	
 }
