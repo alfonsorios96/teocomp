@@ -530,11 +530,6 @@ void fda_ambiguo_construct(AMBIGUO *head){
 int sizeArray(int array[]){
 	int i = 0;
 
-	if (array[0] == 0)
-	{
-		return i;
-	}
-
 	while(array[i] != -1){
 		i++;
 	}
@@ -717,9 +712,8 @@ int getAlias(AMBIGUO *helper, int array[]){
 }
 
 void getColateralStates(AMBIGUO *helper, DELTA *head, int array[]){
-	printf("Debugger : %i\n", sizeArray(array));
 	DELTA *temp;
-	int i = 0;
+	int i = sizeArray(array);
 
 	for (temp = head; temp != NULL; temp = temp->next)
 	{
@@ -747,6 +741,8 @@ void createColateralDeltas(AMBIGUO *helper, FD_AUTOMATA **automata){
 		int i;
 
 		int array[SIZE_MAX];
+		array[0] = -1;
+
 		for (i = 0; i < size; i++)
 		{
 			getColateralStates(temp, (*automata)->head, array);
@@ -771,56 +767,56 @@ void createColateralDeltas(AMBIGUO *helper, FD_AUTOMATA **automata){
 }
 
 void fda_convertToDeterminist(FD_AUTOMATA ** automata){
+	while(fda_isNotDeterminist(*automata) == 1){
+		AMBIGUO * helper = NULL;
+		helper = (AMBIGUO *) malloc(sizeof(AMBIGUO));
+		fda_ambiguo_construct(helper);
+		DELTA *temp, *aux;
+		int array[SIZE_MAX];
+		int flag;
 
-	AMBIGUO * helper = NULL;
-	helper = (AMBIGUO *) malloc(sizeof(AMBIGUO));
-	fda_ambiguo_construct(helper);
-	DELTA *temp, *aux;
-	int array[SIZE_MAX];
-	int flag;
-
-	for (temp = (*automata)->head; temp != NULL; temp = temp->next)
-	{
-		flag = 0;
-		for (aux = (*automata)->head; aux != NULL; aux = aux->next)
+		for (temp = (*automata)->head; temp != NULL; temp = temp->next)
 		{
-			if (temp->state == aux->state && temp->data == aux->data)
+			flag = 0;
+			for (aux = (*automata)->head; aux != NULL; aux = aux->next)
 			{
-				flag++;
+				if (temp->state == aux->state && temp->data == aux->data)
+				{
+					flag++;
+				}
+			}
+			if (flag > 1)
+			{
+				refillArray((*automata)->head, array, temp->state, temp->data);
+				helper = fda_addAmbiguo(helper, (*automata)->states, (*automata)->finals, &((*automata)->size), &((*automata)->f_size), temp->state, temp->data, array);
+				break;
 			}
 		}
-		if (flag > 1)
-		{
-			refillArray((*automata)->head, array, temp->state, temp->data);
-			helper = fda_addAmbiguo(helper, (*automata)->states, (*automata)->finals, &((*automata)->size), &((*automata)->f_size), temp->state, temp->data, array);
-			break;
-		}
+
+		printf("\n---------------\n");
+
+		fda_showDeltas(*automata);
+
+		printf("\n---------------\n");
+		
+		deleteOldDeltas(helper, automata);
+
+		printf("\n---------------\n");
+
+		fda_showDeltas(*automata);
+
+		createNewDeltas(helper, automata);
+
+		printf("\n---------------\n");
+
+		fda_showDeltas(*automata);
+
+		createColateralDeltas(helper, automata);
+
+		printf("\n---------------\n");
+
+		fda_showDeltas(*automata);
 	}
-
-	printf("\n---------------\n");
-
-	fda_showDeltas(*automata);
-
-	printf("\n---------------\n");
-	
-	deleteOldDeltas(helper, automata);
-
-	printf("\n---------------\n");
-
-	fda_showDeltas(*automata);
-
-	createNewDeltas(helper, automata);
-
-	printf("\n---------------\n");
-
-	fda_showDeltas(*automata);
-
-	createColateralDeltas(helper, automata);
-
-	printf("\n---------------\n");
-
-	fda_showDeltas(*automata);
-	
 }
 
 /*
