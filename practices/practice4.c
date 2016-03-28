@@ -25,7 +25,12 @@ void menu(FD_AUTOMATA *automata){
 
 	switch(opc){
 		case 1:
-			f_readAutomata(&automata);
+			printf("Introduzca el nombre del archivo con extension : ");
+			char array[SIZE_MAX];
+			str_input(array);
+			printf("\n");
+			f_readAutomata(&automata, array);
+			fda_convertToDeterminist(&automata);
 		break;
 		case 2:
 			p4_run(automata);

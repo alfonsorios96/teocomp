@@ -10,3 +10,4 @@ v0.0.6 MODULE : Automatas	 		2016/03/06
 v0.0.7 MODULE : Finite Det	 		2016/03/08
 v0.0.8 MODULE : Files		 		2016/03/09
 v0.0.9 MODULE : Read automata		2016/03/14
+v0.0.10 MODULE : Convertion			2016/03/28

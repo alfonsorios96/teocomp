@@ -6,4 +6,4 @@
 
 void menu(FD_AUTOMATA *automata);
 void p4_run(FD_AUTOMATA * automata);
-void run(void);
+void run();

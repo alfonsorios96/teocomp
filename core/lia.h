@@ -1,11 +1,12 @@
 /*
 	@author: Alfonso Ríos
 	@description: This is the template about all the functions.
-	@version: v0.0.7
+	@version: v0.0.10
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #define SIZE_MAX 1200
 
 // Here is defined the type of data.
@@ -51,3 +52,12 @@ typedef struct row
 	char data[SIZE_MAX];
 	struct row *prev, *next;
 }ROW;
+
+typedef struct ambiguo
+{
+	int state;
+	char data;
+	int states[SIZE_MAX];
+	int alias;
+	struct ambiguo *prev, *next;
+}AMBIGUO;
