@@ -586,6 +586,7 @@ int newState(int array[], int size){
 void addState(int array[], int *size, int state){
 	array[*size] = state;
 	(*size)++; 
+	array[*size] = -1;
 }
 
 void newFinals(int alias, int states[], int finals[], int size, int *f_size){
@@ -677,96 +678,99 @@ void createNewDeltas(AMBIGUO *helper, FD_AUTOMATA **automata){
 
 int cmp_arrays(int array1[], int array2[]){
 	int size = sizeArray(array1);
-	int count = sizeArray(array2);
 
-	if (size != count)
+	int i;
+
+	for (i = 0; i < size; i++)
 	{
-		return 0;
-	}else{
-		int i;
-
-		for (i = 0; i < size; i++)
+		if (array1[i] != array2[i])
 		{
-			if (array1[i] != array2[i])
-			{
-				return 0;
-			}
-		}
-
-		return 1;
-	}
-}
-
-int getAlias(AMBIGUO *helper, int array[]){
-	AMBIGUO *temp;
-
-	for (temp = helper; temp != NULL; temp = temp->next)
-	{
-		if (cmp_arrays(array, temp->states) == 1)
-		{
-			return temp->alias;
+			return 0;
 		}
 	}
 
-	return -1;
+	return 1;
 }
 
-void getColateralStates(AMBIGUO *helper, DELTA *head, int array[]){
+void getColateralStates(AMBIGUO *ambiguos, AMBIGUO *helper, FD_AUTOMATA **automata, char data){
 	DELTA *temp;
-	int i = sizeArray(array);
 
-	for (temp = head; temp != NULL; temp = temp->next)
+	int array[SIZE_MAX];
+	array[0] = -1;
+	int j = sizeArray(array);
+
+	for (temp = (*automata)->head; temp != NULL; temp = temp->next)
 	{
-		int j;
 		int count = sizeArray(helper->states);
-
-		for (j = 0; j < count; j++)
-		{
-			if (helper->states[j] == temp->state && temp->data == helper->data && existInArray(array, temp->s_next) == 0)
-			{
-				array[i] = temp->s_next;
-				i++;
-			}
-		}
-		array[i] = -1;
-	}
-}
-
-void createColateralDeltas(AMBIGUO *helper, FD_AUTOMATA **automata){
-	AMBIGUO *temp;
-
-	for (temp = helper; temp != NULL; temp = temp->next)
-	{
-		int size = str_size((*automata)->language);
 		int i;
 
-		int array[SIZE_MAX];
-		array[0] = -1;
-
-		for (i = 0; i < size; i++)
+		for (i = 0; i < count; i++)
 		{
-			getColateralStates(temp, (*automata)->head, array);
-			int alias = getAlias(helper, array);
-			if (alias != -1 && fda_existDelta((*automata)->head, temp->data, temp->alias, alias) == 0)
+			if (helper->states[i] == temp->state && temp->data == data)
 			{
-				(*automata)->head = fda_addDelta((*automata)->head, temp->data, temp->alias, alias);
-			}else{
-				int count = sizeArray(array);
-				int j;
+				addState(array, &j, helper->states[i]);
+			}
+		}
+	}
 
-				for (j = 0; j < count; j++)
+	if (j == 1)
+	{
+		if (fda_existDelta((*automata)->head, data, helper->alias, array[0]) == 0)
+		{
+			(*automata)->head = fda_addDelta((*automata)->head, data, helper->alias, array[0]);
+		}
+	}
+
+	if (j > 1)
+	{
+		AMBIGUO *aux;
+
+		int flag = 0;
+
+		for (aux = ambiguos; aux != NULL; aux = aux->next)
+		{
+			if (cmp_arrays(aux->states, array) == 1)
+			{
+				if (fda_existDelta((*automata)->head, data, helper->alias, aux->alias) == 0)
 				{
-					if (fda_existDelta((*automata)->head, temp->data, temp->alias, array[j]) == 0)
-					{
-						(*automata)->head = fda_addDelta((*automata)->head, temp->data, temp->alias, array[j]);
-					}
+					flag = 1;
+					(*automata)->head = fda_addDelta((*automata)->head, data, helper->alias, aux->alias);
+				}
+			}
+		}
+
+		if (flag == 0)
+		{
+			int k;
+			for (k = 0; k < j; k++)
+			{
+				if (fda_existDelta((*automata)->head, data, helper->alias, array[k]) == 0)
+				{
+					(*automata)->head = fda_addDelta((*automata)->head, data, helper->alias, array[k]);
 				}
 			}
 		}
 	}
 }
 
+void createColateralDeltas(AMBIGUO *helper, FD_AUTOMATA **automata){
+	AMBIGUO *temp;
+
+		// Recorrer cada ambiguedad.
+	for (temp = helper; temp != NULL; temp = temp->next)
+	{
+		int size = str_size((*automata)->language);
+		int i;
+
+		for (i = 0; i < size; i++)
+		{
+			getColateralStates(helper, temp, automata, (*automata)->language[i]);
+		}
+	}
+}
+
 void fda_convertToDeterminist(FD_AUTOMATA ** automata){
+	
 	while(fda_isNotDeterminist(*automata) == 1){
 		AMBIGUO * helper = NULL;
 		helper = (AMBIGUO *) malloc(sizeof(AMBIGUO));
@@ -793,30 +797,29 @@ void fda_convertToDeterminist(FD_AUTOMATA ** automata){
 			}
 		}
 
-		printf("\n---------------\n");
-
 		fda_showDeltas(*automata);
 
 		printf("\n---------------\n");
-		
+
 		deleteOldDeltas(helper, automata);
 
-		printf("\n---------------\n");
-
 		fda_showDeltas(*automata);
+
+		printf("\n---------------\n");
 
 		createNewDeltas(helper, automata);
 
-		printf("\n---------------\n");
-
 		fda_showDeltas(*automata);
+
+		printf("\n---------------\n");
 
 		createColateralDeltas(helper, automata);
 
-		printf("\n---------------\n");
-
 		fda_showDeltas(*automata);
+
+		printf("\n---------------\n");
 	}
+
 }
 
 /*
